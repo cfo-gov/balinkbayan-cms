@@ -10,9 +10,7 @@ export const useGetAllItems = (searchTerm?: string) => {
         ? `/media?search=${encodeURIComponent(searchTerm)}`
         : "/media"
       const response = await api.get(url)
-      if (response.statusText !== "OK") {
-        throw new Error("Network response was not ok")
-      }
+
       return response.data
     },
     refetchOnWindowFocus: false,

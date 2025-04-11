@@ -14,7 +14,7 @@ export async function GET(request: Request): Promise<NextResponse<MediaItem[] | 
 
     const searchTerm = searchParams.get('search') || '';
 
-    console.log("Search term:", searchTerm);
+
 
     const db = await open({
       filename: './public/uploads.db',
