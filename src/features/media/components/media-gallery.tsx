@@ -22,7 +22,7 @@ export function MediaGallery() {
   const params = useSearchParams()
 
   const searchParams = params.get("search") || ""
-  const { data: mediaItems } = useGetAllItems()
+  const { data: mediaItems } = useGetAllItems(searchParams)
 
   const copyLink = (link: string) => {
     navigator.clipboard.writeText(window.location.origin + link).then(() => {
@@ -75,7 +75,6 @@ export function MediaGallery() {
 
     window.addEventListener("keydown", handleKeyDown)
 
-    // Clean up the event listener when component unmounts
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
     }
