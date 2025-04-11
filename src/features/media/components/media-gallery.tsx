@@ -22,7 +22,7 @@ export function MediaGallery() {
   const params = useSearchParams()
 
   const searchParams = params.get("search") || ""
-  const { data: mediaItems } = useGetAllItems(searchParams)
+  const { data: mediaItems, isLoading, isError } = useGetAllItems(searchParams)
 
   const copyLink = (link: string) => {
     navigator.clipboard.writeText(window.location.origin + link).then(() => {
@@ -110,7 +110,7 @@ export function MediaGallery() {
             <span className="text-sm font-medium">Add Media</span>
           </div>
         </div>
-        {mediaItems && mediaItems.map((item) => (
+        {mediaItems && !isLoading && !isError ? mediaItems.map((item) => (
           <div
             key={item.id}
             className="relative group overflow-hidden rounded-lg border border-dashed border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-lg"
@@ -151,7 +151,21 @@ export function MediaGallery() {
               </div>
             </div>
           </div>
-        ))}
+        )) : <>stupid</>}
+
+        {isLoading && (
+          <div className="col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
+          </div>)
+        }
+
+        {isError && (
+          <div className="col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5 flex items-center justify-center">
+            <div>
+              Error loading images. Please try again later.
+            </div>
+          </div>
+        )}
       </div>
 
 

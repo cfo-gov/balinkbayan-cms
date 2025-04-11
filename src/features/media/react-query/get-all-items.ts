@@ -6,8 +6,6 @@ export const useGetAllItems = (searchTerm?: string) => {
   return useQuery<MediaItem[]>({
     queryKey: ["all-media", searchTerm],
     queryFn: async () => {
-      console.log("Fetching media items...", searchTerm)
-
       const url = searchTerm
         ? `/media?search=${encodeURIComponent(searchTerm)}`
         : "/media"
