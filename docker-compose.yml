@@ -8,19 +8,30 @@ services:
       - NODE_ENV=production
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.app.rule=Host(`ec2-54-206-34-35.ap-southeast-2.compute.amazonaws.com`)'
+      - 'traefik.http.routers.app.rule=Host(`sample-lgu.r3workshop.live`)'
+      - 'traefik.http.routers.app.entrypoints=websecure'
+      - 'traefik.http.routers.app.tls.certresolver=sslresolver'
       - 'traefik.http.services.app.loadbalancer.server.port=3000'
+      - 'traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https'
+      - 'traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)'
+      - 'traefik.http.routers.http-catchall.entrypoints=web'
+      - 'traefik.http.routers.http-catchall.middlewares=redirect-to-https'
     env_file:
       - .env.local
 
   traefik:
     image: traefik:v2.10
     command:
-      - '--api.insecure=true'
       - '--providers.docker=true'
       - '--entrypoints.web.address=:80'
+      - '--entrypoints.websecure.address=:443'
+      - '--certificatesresolvers.sslresolver.acme.tlschallenge=true'
+      - '--certificatesresolvers.sslresolver.acme.email=rellsub1@gmail.com'
+      - '--certificatesresolvers.sslresolver.acme.storage=/letsencrypt/acme.json'
     ports:
       - '80:80'
+      - '443:443'
       - '8080:8080' # Traefik dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt
