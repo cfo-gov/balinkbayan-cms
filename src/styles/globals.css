@@ -1,0 +1,95 @@
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-sidebar: #000000e6;
+  --color-primary: #0f172a;
+  --color-secondary: #f1f5f9;
+  --color-destructive: #ef4444;
+  --color-border: #d1d5db;
+
+  --color-muted: #d1d5db;
+  --color-muted-foreground: #7f8ea3;
+
+  --grid-template-columns-page-layout: 18rem 1fr;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1536px) {
+    max-width: 1536px;
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility label {
+  @apply mb-2 block text-sm font-medium leading-6 text-gray-600;
+}
+
+@utility form-control {
+  @apply flex w-full rounded-lg border-0 bg-transparent px-4 py-3.5 text-sm shadow-xs ring-1 ring-inset ring-gray-300 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2  disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility form-error {
+  @apply ring-destructive focus:ring-destructive;
+}
+
+@utility error-msg {
+  @apply text-sm text-destructive;
+}
+
+@utility page-heading {
+  @apply text-base font-extrabold leading-6 text-gray-900 sm:text-2xl;
+}
+
+@utility icon-default {
+  @apply h-6 w-6;
+}
+
+@utility icon-sm {
+  @apply h-5 w-5;
+}

@@ -1,0 +1,68 @@
+import { type MediaItem } from "./types";
+
+export const mediaItems: MediaItem[] = [
+  {
+    id: "1",
+    title: "Mountain Landscape",
+    description: "Beautiful mountain range at sunset",
+    type: "image",
+    src: "/placeholder.svg?height=600&width=800",
+    alt: "Mountain landscape at sunset",
+  },
+  {
+    id: "2",
+    title: "Ocean View",
+    description: "Serene ocean view with waves crashing on the shore",
+    type: "image",
+    src: "/placeholder.svg?height=600&width=800",
+    alt: "Ocean view with waves",
+  },
+  {
+    id: "3",
+    title: "Forest Trail",
+    description: "A winding trail through a dense forest",
+    type: "image",
+    src: "/placeholder.svg?height=600&width=800",
+    alt: "Forest trail",
+  },
+  {
+    id: "4",
+    title: "City Skyline",
+    description: "Urban skyline at night with lights",
+    type: "image",
+    src: "/placeholder.svg?height=600&width=800",
+    alt: "City skyline at night",
+  },
+  {
+    id: "5",
+    title: "Desert Landscape",
+    description: "Vast desert with sand dunes",
+    type: "image",
+    src: "/placeholder.svg?height=600&width=800",
+    alt: "Desert landscape with sand dunes",
+  },
+  {
+    id: "6",
+    title: "Waterfall",
+    description: "Majestic waterfall in a tropical setting",
+    type: "image",
+    src: "/placeholder.svg?height=600&width=800",
+    alt: "Tropical waterfall",
+  },
+  {
+    id: "7",
+    title: "Autumn Forest",
+    description: "Forest with trees in autumn colors",
+    type: "image",
+    src: "/placeholder.svg?height=600&width=800",
+    alt: "Autumn forest",
+  },
+  {
+    id: "8",
+    title: "Snow Capped Mountains",
+    description: "Mountains with snow caps against blue sky",
+    type: "image",
+    src: "/placeholder.svg?height=600&width=800",
+    alt: "Snow capped mountains",
+  },
+]
