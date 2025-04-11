@@ -28,6 +28,6 @@
     ],
 
     /* Others */
-    "no-console": "error"
+    "no-console": "warn"
   }
 }

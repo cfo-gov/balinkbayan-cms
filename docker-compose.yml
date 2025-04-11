@@ -1,0 +1,26 @@
+services:
+  balinkbayancms:
+    build: .
+    container_name: balinkbayancms
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.app.rule=Host(`ec2-54-206-34-35.ap-southeast-2.compute.amazonaws.com`)'
+      - 'traefik.http.services.app.loadbalancer.server.port=3000'
+    env_file:
+      - .env.local
+
+  traefik:
+    image: traefik:v2.10
+    command:
+      - '--api.insecure=true'
+      - '--providers.docker=true'
+      - '--entrypoints.web.address=:80'
+    ports:
+      - '80:80'
+      - '8080:8080' # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
