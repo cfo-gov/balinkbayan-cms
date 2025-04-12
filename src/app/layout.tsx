@@ -1,9 +1,11 @@
 import { Manrope } from 'next/font/google';
+import Script from 'next/script';
 
 import { cn } from '@/shared/lib/utils';
 import '../styles/globals.css';
 import Providers from './providers';
 
+// Define the plausible type
 const manrope = Manrope({ weight: ['400', '500', '600', '700', '800'], subsets: ['latin'] });
 
 export const metadata = {
@@ -14,8 +16,18 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
+      <Script
+        defer
+        data-domain="sample-lgu.r3workshop.live"
+        src="https://pl-analytics.r3workshop.live/js/script.file-downloads.outbound-links.tagged-events.js"
+      />
+      <Script id="plausible-script">
+        {`window.plausible = window.plausible || function(...args) {(window.plausible.q = window.plausible.q || []).push(args)}`}
+      </Script>
       <body className={cn(manrope.className, 'h-full')}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

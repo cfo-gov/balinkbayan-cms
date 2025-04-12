@@ -99,7 +99,7 @@ export function MediaGallery() {
   return (
     <div className="w-full">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        <div
+        {searchParams === "" && <div
           className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
           onClick={() => setShowUploadDialog(true)}
         >
@@ -109,8 +109,9 @@ export function MediaGallery() {
             </div>
             <span className="text-sm font-medium">Add Media</span>
           </div>
-        </div>
-        {mediaItems && !isLoading && !isError ? mediaItems.map((item) => (
+        </div>}
+
+        {mediaItems && !isLoading && !isError && mediaItems.map((item) => (
           <div
             key={item.id}
             className="relative group overflow-hidden rounded-lg border border-dashed border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-lg"
@@ -151,7 +152,7 @@ export function MediaGallery() {
               </div>
             </div>
           </div>
-        )) : <>stupid</>}
+        ))}
 
         {isLoading && (
           <div className="col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5 flex items-center justify-center">
