@@ -3,7 +3,7 @@ import { type TChildren } from '@/shared/types/commons';
 
 type UsersTableProps = TChildren;
 
-const UsersTable = ({ children }: UsersTableProps) => {
+const PagesTable = ({ children }: UsersTableProps) => {
   return (
     <Table>
       <TableHeader>
@@ -20,4 +20,4 @@ const UsersTable = ({ children }: UsersTableProps) => {
     </Table>
   );
 };
-export default UsersTable;
+export default PagesTable;

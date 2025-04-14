@@ -6,7 +6,7 @@ import { type User } from '../types';
 type Props = {
   data?: User[];
 };
-const UsersContent = ({ data }: Props) => {
+const PagesContent = ({ data }: Props) => {
   return (
     <>
       {data?.length ? (
@@ -33,4 +33,4 @@ const UsersContent = ({ data }: Props) => {
   );
 };
 
-export default UsersContent;
+export default PagesContent;

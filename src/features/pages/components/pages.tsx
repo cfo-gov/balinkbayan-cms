@@ -8,10 +8,10 @@ import { TableDataSkeleton } from '@/shared/components/ui/table-data-skeleton';
 import { PAGINATION_PER_PAGE } from '@/shared/constants/commons';
 import { usePagination } from '@/shared/hooks';
 import { useGetUsersQuery } from '../hooks/query/use-get-users-query';
-import UsersContent from './users-content';
-import UsersTable from './users-table';
+import PagesContent from './pages-content';
+import PagesTable from './pages-table';
 
-const Users = () => {
+const Pages = () => {
   const { page, handlePageChange } = usePagination();
   const methods = useForm();
 
@@ -28,9 +28,9 @@ const Users = () => {
         </FormProvider>
       </div>
 
-      <UsersTable>
-        {isLoading ? <TableDataSkeleton columns={4} /> : <UsersContent data={users} />}
-      </UsersTable>
+      <PagesTable>
+        {isLoading ? <TableDataSkeleton columns={4} /> : <PagesContent data={users} />}
+      </PagesTable>
 
       <Pagination
         currentPage={page}
@@ -41,4 +41,4 @@ const Users = () => {
   );
 };
 
-export default Users;
+export default Pages;

@@ -39,6 +39,11 @@ const PageHeader = ({ title, search, navigateTo, btnLabel, withIcon = false, ...
     router.push(`${pathname}?search=${data.searchTerm}`);
   }
 
+  const triggerEvent = () => {
+    const eventtype = `create_${title.toLowerCase().slice(0, -1)}`;
+    window.plausible(eventtype)
+  }
+
   return (
     <div className="flex flex-wrap items-center justify-between">
       <div className="sm:flex-auto">
@@ -46,7 +51,7 @@ const PageHeader = ({ title, search, navigateTo, btnLabel, withIcon = false, ...
       </div>
       <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
         {navigateTo && <Link href={navigateTo!}>
-          <Button size="lg" className="px-4 py-3" {...buttonProps}>
+          <Button size="lg" onClick={triggerEvent} className="px-4 py-3" {...buttonProps}>
             {withIcon && <PlusCircle className="mr-2 h-4 w-4" />}
             {btnLabel}
           </Button>

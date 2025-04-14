@@ -1,12 +1,12 @@
+import { withErrorHandling } from '@/config/api-error-middleware';
 import { access, unlink } from 'fs/promises';
 import { NextResponse } from 'next/server';
 import path from 'path';
 import { open } from 'sqlite';
 import sqlite3 from 'sqlite3';
 
-
-
-export async function DELETE(request: Request) {
+// The actual handler logic separated out
+async function deleteMediaHandler(request: Request) {
   const db = await open({
     filename: './public/uploads.db',
     driver: sqlite3.Database,
@@ -42,8 +42,6 @@ export async function DELETE(request: Request) {
     const uploadDir = path.join(process.cwd(), 'uploads');
     const absolutePath = path.join(uploadDir, filePathParts[2]);
 
-
-
     try {
       await access(absolutePath);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -57,7 +55,6 @@ export async function DELETE(request: Request) {
     await unlink(absolutePath);
 
     // Delete the record from the database
-
     await db.run('DELETE FROM media WHERE id = ?', [id]);
 
     // Return success response
@@ -75,5 +72,7 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+export const DELETE = withErrorHandling(deleteMediaHandler);
 
 export const runtime = 'nodejs';

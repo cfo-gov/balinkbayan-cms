@@ -2,7 +2,7 @@ export type MediaItem = {
   id: string
   title: string
   description: string
-  type: "image" | "video"
+  type: string
   src: string
   alt: string
 }

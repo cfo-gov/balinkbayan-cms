@@ -2,19 +2,18 @@
 
 import { Button } from "@/shared/components/ui/button"
 import { CAlert } from "@/shared/components/utilities/alert"
-import { ChevronLeft, ChevronRight, Link, Plus, Trash2, X } from "lucide-react"
+import { cn } from "@/shared/lib/utils"
+import { ChevronLeft, ChevronRight, Link, Play, Plus, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useDeleteImage } from "../react-query/delete-image"
 import { useGetAllItems } from "../react-query/get-all-items"
-import { useUploadImage } from "../react-query/upload-image"
-import { type MediaItem, type MediaUploadType } from "../types"
+import { type MediaItem } from "../types"
 import { UploadNewMediaModal } from "./upload-new-media-modal"
 
 export function MediaGallery() {
-  const upload = useUploadImage()
   const deleteitem = useDeleteImage()
 
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null)
@@ -81,53 +80,66 @@ export function MediaGallery() {
   }, [navigateGallery, selectedItem])
 
 
-  const handleUpload = async (newItem: MediaUploadType) => {
-    const fd = new FormData()
-    fd.append("file", newItem.file as Blob)
-
-    upload.mutate(fd, {
-      onSuccess: () => {
-        toast.success("Image uploaded successfully")
-        setShowUploadDialog(false)
-      },
-      onError: (error) => {
-        toast.error(`Error uploading image: ${error}`)
-      }
-    })
-  }
 
   return (
     <div className="w-full">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        {searchParams === "" && <div
-          className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
-          onClick={() => setShowUploadDialog(true)}
-        >
-          <div className="flex flex-col items-center gap-2 text-gray-500">
-            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-              <Plus className="h-6 w-6 text-gray-500" />
+        {searchParams === "" &&
+          <div
+            className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+            onClick={() => setShowUploadDialog(true)}
+          >
+            <div className="flex flex-col items-center gap-2 text-gray-500">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <Plus className="h-6 w-6 text-gray-500" />
+              </div>
+              <span className="text-sm font-medium">Add Media</span>
             </div>
-            <span className="text-sm font-medium">Add Media</span>
-          </div>
-        </div>}
+          </div>}
 
         {mediaItems && !isLoading && !isError && mediaItems.map((item) => (
           <div
             key={item.id}
-            className="relative group overflow-hidden rounded-lg border border-dashed border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-lg"
+            className="relative flex group overflow-hidden rounded-lg border border-dashed border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-lg"
             onClick={() => openModal(item)}
           >
             <div className="aspect-square relative">
-              <Image
-                src={item.src}
-                alt={item.alt}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-              />
+              {item.type.split("/")[0] === "video" ? (
+                <div className="w-full h-full bg-black flex items-center justify-center">
+                  <video
+                    src={item.src}
+                    className="max-h-full max-w-full object-contain"
+                    muted
+                    playsInline={false}
+                    preload="metadata"
+                    ref={(el) => {
+                      if (el) {
+                        el.onloadedmetadata = () => {
+                          const thumbnailTime = Math.min(1, el.duration * 0.25);
+                          el.currentTime = thumbnailTime;
+                          el.pause();
+                        };
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center">
+                      <Play className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
               <CAlert
                 trigger={
-                  <Button variant="ghost" className="absolute  right-0 mr-2.5 mt-1 bg-white border border-dotted border-black px-1 py-1.5 hover:bg-white/70">
+                  <Button variant="ghost" className="absolute right-0 mr-2.5 mt-1 bg-white border border-dotted border-black px-1 py-1.5 hover:bg-white/70">
                     <span className="sr-only">Delete</span>
                     <Trash2 className="h-6 w-6 text-black text-shadow-lg text-shadow-white" />
                   </Button>}
@@ -198,15 +210,24 @@ export function MediaGallery() {
             </button>
 
             <div className="relative max-h-[80vh] max-w-full">
-              <Image
-                src={selectedItem.src || "/placeholder.svg"}
-                alt={selectedItem.alt}
-                width={1200}
-                height={800}
-                className="object-contain min-h-[683px] max-h-[80vh]"
-              />
+              {selectedItem.type?.split("/")[0] === "video" ? (
+                <video
+                  src={selectedItem.src}
+                  controls
+                  autoPlay
+                  className="object-contain min-h-[683px] max-h-[80vh]"
+                />
+              ) : (
+                <Image
+                  src={selectedItem.src || "/placeholder.svg"}
+                  alt={selectedItem.alt}
+                  width={1200}
+                  height={800}
+                  className="object-contain min-h-[683px] max-h-[80vh]"
+                />
+              )}
               <div className="relative">
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/50 text-white">
+                <div className={cn("absolute bottom-0 left-0 right-0 p-4 bg-black/50 text-white", selectedItem.type?.split("/")[0] === "video" && "relative")}>
                   <h2 className="text-xl font-bold">{selectedItem.title}</h2>
                   <p className="text-sm opacity-90">{selectedItem.description}</p>
                 </div>
@@ -225,7 +246,7 @@ export function MediaGallery() {
         </div>
       )}
 
-      <UploadNewMediaModal open={showUploadDialog} setClose={() => setShowUploadDialog(false)} onUpload={handleUpload} />
+      <UploadNewMediaModal open={showUploadDialog} setClose={() => setShowUploadDialog(false)} />
     </div>
   )
 }

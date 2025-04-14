@@ -5,7 +5,6 @@ import { cn } from '@/shared/lib/utils';
 import '../styles/globals.css';
 import Providers from './providers';
 
-// Define the plausible type
 const manrope = Manrope({ weight: ['400', '500', '600', '700', '800'], subsets: ['latin'] });
 
 export const metadata = {

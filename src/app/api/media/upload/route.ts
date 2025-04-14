@@ -1,3 +1,4 @@
+import { withErrorHandling } from '@/config/api-error-middleware';
 import { mkdir, writeFile } from 'fs/promises';
 import { NextResponse } from 'next/server';
 import path from 'path';
@@ -17,6 +18,7 @@ async function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS media (
       id TEXT PRIMARY KEY NOT NULL,
       fileName TEXT NOT NULL,
+      fileDescription TEXT NOT NULL,
       originalFileName TEXT NOT NULL,
       fileType TEXT NOT NULL,
       filePath TEXT NOT NULL,
@@ -29,10 +31,12 @@ async function initializeDatabase() {
   return db;
 }
 
-export async function POST(request: Request) {
+async function uploadHandler(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const title = formData.get('title')
+    const description = formData.get('description')
 
     if (!file) {
       return NextResponse.json(
@@ -42,21 +46,23 @@ export async function POST(request: Request) {
     }
 
     // Check if file is an image
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
     if (!validTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'File must be an image (JPEG, PNG, GIF, WEBP)' },
+        { error: 'File must be an image (JPEG, PNG, GIF, WEBP) or video (MP4, WebM, QuickTime)' },
         { status: 400 }
       );
     }
+
+
 
     // Convert the file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
     // Create unique filename
-    const og_filename = file.name.split('.')
-    const fileName = `${og_filename[0]}-${Date.now()}.${og_filename[1]}`;
+    const fileName = title as string;
+    const fileDescription = description as string;
 
     // Ensure upload directory exists
     const uploadDir = path.join(process.cwd(), 'uploads');
@@ -69,11 +75,12 @@ export async function POST(request: Request) {
     // Save record to database
     const db = await initializeDatabase();
     await db.run(
-      `INSERT INTO media (id, fileName, originalFileName, fileType, filePath, fileSize, url) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO media (id, fileName, fileDescription, originalFileName, fileType, filePath, fileSize, url) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         uuidv4(),
         fileName,
+        fileDescription,
         file.name,
         file.type,
         `/uploads/${fileName}`,
@@ -87,6 +94,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       fileName,
+      fileDescription,
       url: `/uploads/${fileName}`
     });
 
@@ -100,5 +108,5 @@ export async function POST(request: Request) {
   }
 }
 
-
+export const POST = withErrorHandling(uploadHandler);
 export const runtime = 'nodejs';

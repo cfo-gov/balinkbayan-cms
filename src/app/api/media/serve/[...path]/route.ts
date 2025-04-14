@@ -17,19 +17,21 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
   }
 
   try {
-    const stats = await fs.stat(safePath);
+    const stats = await fs.stat(safePath || "");
 
     if (!stats.isFile()) {
       throw new Error('Not a file');
     }
 
-    const fileBuffer = await fs.readFile(safePath);
+    const fileBuffer = await fs.readFile(safePath || "");
 
     const extension = safePath.split('.').pop() ?? '';
     const contentType = {
       jpg: 'image/jpeg',
       png: 'image/png',
       webp: 'image/webp',
+      mp4: 'video/mp4',
+
     }[extension] || 'application/octet-stream';
 
     return new NextResponse(fileBuffer, {

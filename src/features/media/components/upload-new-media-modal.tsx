@@ -3,69 +3,84 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/shared/components/ui/input";
 import { Progress } from "@/shared/components/ui/progress";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useUploadImage } from "../react-query/upload-image";
+import { type fileUploadSchema, FileUploadSchema } from "../utils/validations";
+
 
 interface UploadNewMediaModalProps {
   open: boolean;
   setClose: () => void;
-  onUpload: (data: { title: string; description: string; file: File | null }) => void;
 }
 
-export function UploadNewMediaModal({ open, setClose, onUpload }: UploadNewMediaModalProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
+export function UploadNewMediaModal({ open, setClose }: UploadNewMediaModalProps) {
   const [progress, setProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!file) {
-      setPreview(null);
-      return;
-    }
+  const upload = useUploadImage()
 
-    const objectUrl = URL.createObjectURL(file);
-    setPreview(objectUrl);
+  const method = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+      file: null as unknown as File
+    },
+    resolver: zodResolver(FileUploadSchema)
+  })
+  const { register, handleSubmit, watch, reset, resetField, setValue, formState } = method
 
-    // Clean up the URL when component unmounts
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [file]);
+  const onSubmit: SubmitHandler<fileUploadSchema> = async data => {
+    if (!data.file) return;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
     setUploading(true);
+    const fd = new FormData();
 
-    // Simulate upload progress
-    const timer = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 300);
+    fd.append("file", data.file)
+    fd.append("title", data.title)
+    fd.append("description", data.description)
 
-    // Simulate upload delay
-    setTimeout(() => {
-      clearInterval(timer);
-      setProgress(100);
-      onUpload({ title, description, file });
-      resetForm();
-      setUploading(false);
-    }, 3000);
-  };
+    upload.mutate(fd, {
+      onSuccess: () => {
+        toast.success("image uploaded")
+        setProgress(100);
+        setTimeout(() => {
+          setUploading(false);
+          setClose()
+        }, 500);
+        reset()
+      },
+      onError: () => {
+        toast.error("image upload failed")
+        setUploading(false);
+      }
+    }
+    )
+  }
 
   const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setFile(null);
-    setPreview(null);
+    reset();
     setProgress(0);
+    setPreview(null);
   };
+
+  const file = watch("file") as File
+
+  useEffect(() => {
+    if (file instanceof File) {
+      const objectUrl = URL.createObjectURL(file);
+      setPreview(objectUrl);
+
+      return () => URL.revokeObjectURL(objectUrl);
+    } else {
+      setPreview(null);
+    }
+  }, [file]);
 
   const handleClose = () => {
     resetForm();
@@ -85,18 +100,19 @@ export function UploadNewMediaModal({ open, setClose, onUpload }: UploadNewMedia
           </button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="title" className="block text-sm font-medium">
               Title
             </label>
             <Input
               id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter media title"
-              disabled={uploading}
+              {...register("title")}
             />
+            {formState.errors.title && (
+              <p className="text-red-500 text-sm mt-1">{formState.errors.title.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -105,17 +121,18 @@ export function UploadNewMediaModal({ open, setClose, onUpload }: UploadNewMedia
             </label>
             <Textarea
               id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              {...register("description")}
               rows={3}
               placeholder="Enter media description"
-              disabled={uploading}
             />
+            {formState.errors.description && (
+              <p className="text-red-500 text-sm mt-1">{formState.errors.description.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="file" className="block text-sm font-medium">
-              Media File
+            <label htmlFor="file" className="block text-sm font-medium"
+              onClick={() => reset({ ...method.getValues(), file: null as unknown as File })}>
             </label>
             {preview ? (
               <div className="mt-2 relative">
@@ -136,7 +153,7 @@ export function UploadNewMediaModal({ open, setClose, onUpload }: UploadNewMedia
                 ) : null}
                 <button
                   type="button"
-                  onClick={() => setFile(null)}
+                  onClick={() => resetField("file")}
                   className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full"
                   disabled={uploading}
                 >
@@ -144,9 +161,9 @@ export function UploadNewMediaModal({ open, setClose, onUpload }: UploadNewMedia
                 </button>
               </div>
             ) : (
-              <div
-                className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer"
-                onClick={() => !uploading && document.getElementById("file-input")?.click()}
+              <label
+                htmlFor="file-input"
+                className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer block"
               >
                 <div className="flex flex-col items-center gap-2">
                   <Upload className="h-8 w-8 text-gray-400" />
@@ -157,16 +174,19 @@ export function UploadNewMediaModal({ open, setClose, onUpload }: UploadNewMedia
                     {file ? file.name : "No file selected"}
                   </p>
                 </div>
-              </div>
+              </label>
             )}
             <input
               id="file-input"
               type="file"
               className="hidden"
               accept="image/*,video/*"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              disabled={uploading}
+              {...register("file")}
+              onChange={(e) => setValue("file", e.target.files?.[0] as File ?? null)}
             />
+            {formState.errors.file && (
+              <p className="text-red-500 text-sm mt-1">{formState.errors.file.message}</p>
+            )}
           </div>
 
           {uploading && (

@@ -45,7 +45,7 @@ export function CAlert({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
+      {trigger && <AlertDialogTrigger className="bg-black" asChild>{trigger}</AlertDialogTrigger>}
       <AlertDialogContent className="bg-white dark:bg-gray-800">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
